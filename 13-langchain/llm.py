@@ -1,7 +1,11 @@
+'''
+简单使用 langchain 进行大模型 API 的对话
+'''
+
+import os
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
-import os
 
 llm = ChatOpenAI(
     api_key=os.getenv("DASHSCOPE_API_KEY"),
@@ -10,10 +14,8 @@ llm = ChatOpenAI(
     # other params...
 )
 
-prompt = ChatPromptTemplate.from_messages([
-    ("system", "你是一个世界级的技术专家"),
-    ("user", "{input}")
-]
+prompt = ChatPromptTemplate.from_messages(
+    [("system", "你是一个世界级的技术专家"), ("user", "{input}")]
 )
 
 output_parser = StrOutputParser()
