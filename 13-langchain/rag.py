@@ -12,6 +12,7 @@ from langchain.agents import create_react_agent, AgentExecutor
 from langchain_community.callbacks.streamlit import StreamlitCallbackHandler
 from langchain_openai import ChatOpenAI
 
+api_key = os.getenv("OPENAI_API_KEY")
 # 设置Streamlit应用的页面标题和布局
 st.set_page_config(page_title="文档问答", layout="wide")
 
@@ -49,7 +50,13 @@ def configure_retriever(uploaded_files):
     splits = text_splitter.split_documents(docs)
 
     # 使用 openai 的向量模型生成文档的向量表示
-    embeddings = OpenAIEmbeddings()
+    embeddings = OpenAIEmbeddings(
+        api_key=api_key,
+        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        model="text-embedding-v3",
+        deployment="text-embedding-v3",
+    )
+
     vectordb = Chroma.from_documents(splits, embeddings)
 
     # 创建文档检索器
@@ -147,8 +154,12 @@ base_prompt = PromptTemplate.from_template(base_prompt_template)
 # 创建部分填充的提示模板
 prompt = base_prompt.partial(instructions=instructions)
 
-api_key = os.getenv("OPENAI_API_KEY")
-embeddings = OpenAIEmbeddings(api_key=api_key)
+embeddings = OpenAIEmbeddings(
+    api_key=api_key,
+    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+    model="text-embedding-v3",
+    deployment="text-embedding-v3",
+)
 
 # 创建 llm
 llm = ChatOpenAI(
