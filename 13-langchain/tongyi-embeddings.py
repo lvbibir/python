@@ -1,7 +1,9 @@
 import os
+import uuid  # 导入 uuid 模块用于生成唯一标识符
 from openai import OpenAI
 import chromadb
 from chromadb.config import Settings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 # 初始化 OpenAI 客户端
 client = OpenAI(
@@ -33,20 +35,25 @@ def store_text_to_chroma(text):
     # 生成向量
     embedding = get_embedding(text)
 
+    # 生成唯一标识符
+    unique_id = str(uuid.uuid4())
+
     # 将文本和向量存储到 Chroma
     collection.add(
         documents=[text],  # 文本内容
         embeddings=[embedding],  # 向量表示
-        ids=["unique_id_1"],  # 唯一标识符
+        ids=[unique_id],  # 使用动态生成的唯一标识符
     )
     print(f"文本已存储到 Chroma 数据库: {text}")
 
 
 # 示例文本
-text = "衣服的质量杠杠的，很漂亮，不枉我等了这么久啊，喜欢，以后还来这里买"
+text1 = "衣服的质量杠杠的，很漂亮，不枉我等了这么久啊，喜欢，以后还来这里买"
+text2 = "疯狂星期四, v我50"
 
 # 存储文本到 Chroma
-store_text_to_chroma(text)
+store_text_to_chroma(text1)
+store_text_to_chroma(text2)
 
 
 # 查询 Chroma 数据库
@@ -60,6 +67,6 @@ def query_chroma(query_text, top_k=1):
 
 
 # 示例查询
-query_text = "我是谁"
+query_text = "疯狂星期四"
 results = query_chroma(query_text)
 print("查询结果:", results)

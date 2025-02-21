@@ -48,6 +48,7 @@ def configure_retriever(uploaded_files):
     # 进行文档分割
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     splits = text_splitter.split_documents(docs)
+    print(splits)
 
     # 使用 openai 的向量模型生成文档的向量表示
     embeddings = OpenAIEmbeddings(
