@@ -1,180 +1,69 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-'''
-@File    :   demo.py
-@Time    :   2023/11/14 16:47:41
-@Author  :   Tomoya Liu
-@Version :   1.0
-@Site    :   https://www.lvbibir.cn
-@Desc    :   None
-'''
+import os
+import shutil
 
 
-import json
+def copy_and_rename_files(root_dir):
+    """
+    遍历目录结构，复制并重命名所有文件到根目录。
 
-json_data = '''
-{
-    "data": [
-        {
-            "{#FSNAME}": "/",
-            "{#FSTYPE}": "rootfs"
-        },
-        {
-            "{#FSNAME}": "/sys",
-            "{#FSTYPE}": "sysfs"
-        },
-        {
-            "{#FSNAME}": "/proc",
-            "{#FSTYPE}": "proc"
-        },
-        {
-            "{#FSNAME}": "/dev",
-            "{#FSTYPE}": "devtmpfs"
-        },
-        {
-            "{#FSNAME}": "/sys/kernel/security",
-            "{#FSTYPE}": "securityfs"
-        },
-        {
-            "{#FSNAME}": "/dev/shm",
-            "{#FSTYPE}": "tmpfs"
-        },
-        {
-            "{#FSNAME}": "/dev/pts",
-            "{#FSTYPE}": "devpts"
-        },
-        {
-            "{#FSNAME}": "/run",
-            "{#FSTYPE}": "tmpfs"
-        },
-        {
-            "{#FSNAME}": "/sys/fs/cgroup",
-            "{#FSTYPE}": "tmpfs"
-        },
-        {
-            "{#FSNAME}": "/sys/fs/cgroup/systemd",
-            "{#FSTYPE}": "cgroup"
-        },
-        {
-            "{#FSNAME}": "/sys/fs/pstore",
-            "{#FSTYPE}": "pstore"
-        },
-        {
-            "{#FSNAME}": "/sys/fs/cgroup/cpu,cpuacct",
-            "{#FSTYPE}": "cgroup"
-        },
-        {
-            "{#FSNAME}": "/sys/fs/cgroup/cpuset",
-            "{#FSTYPE}": "cgroup"
-        },
-        {
-            "{#FSNAME}": "/sys/fs/cgroup/hugetlb",
-            "{#FSTYPE}": "cgroup"
-        },
-        {
-            "{#FSNAME}": "/sys/fs/cgroup/perf_event",
-            "{#FSTYPE}": "cgroup"
-        },
-        {
-            "{#FSNAME}": "/sys/fs/cgroup/memory",
-            "{#FSTYPE}": "cgroup"
-        },
-        {
-            "{#FSNAME}": "/sys/fs/cgroup/pids",
-            "{#FSTYPE}": "cgroup"
-        },
-        {
-            "{#FSNAME}": "/sys/fs/cgroup/devices",
-            "{#FSTYPE}": "cgroup"
-        },
-        {
-            "{#FSNAME}": "/sys/fs/cgroup/blkio",
-            "{#FSTYPE}": "cgroup"
-        },
-        {
-            "{#FSNAME}": "/sys/fs/cgroup/net_cls,net_prio",
-            "{#FSTYPE}": "cgroup"
-        },
-        {
-            "{#FSNAME}": "/sys/fs/cgroup/freezer",
-            "{#FSTYPE}": "cgroup"
-        },
-        {
-            "{#FSNAME}": "/sys/kernel/config",
-            "{#FSTYPE}": "configfs"
-        },
-        {
-            "{#FSNAME}": "/",
-            "{#FSTYPE}": "xfs"
-        },
-        {
-            "{#FSNAME}": "/proc/sys/fs/binfmt_misc",
-            "{#FSTYPE}": "autofs"
-        },
-        {
-            "{#FSNAME}": "/dev/mqueue",
-            "{#FSTYPE}": "mqueue"
-        },
-        {
-            "{#FSNAME}": "/sys/kernel/debug",
-            "{#FSTYPE}": "debugfs"
-        },
-        {
-            "{#FSNAME}": "/dev/hugepages",
-            "{#FSTYPE}": "hugetlbfs"
-        },
-        {
-            "{#FSNAME}": "/boot",
-            "{#FSTYPE}": "xfs"
-        },
-        {
-            "{#FSNAME}": "/var",
-            "{#FSTYPE}": "xfs"
-        },
-        {
-            "{#FSNAME}": "/opt",
-            "{#FSTYPE}": "xfs"
-        },
-        {
-            "{#FSNAME}": "/var/lib/nfs/rpc_pipefs",
-            "{#FSTYPE}": "rpc_pipefs"
-        },
-        {
-            "{#FSNAME}": "/run/user/1000",
-            "{#FSTYPE}": "tmpfs"
-        },
-        {
-            "{#FSNAME}": "/proc/sys/fs/binfmt_misc",
-            "{#FSTYPE}": "binfmt_misc"
-        },
-        {
-            "{#FSNAME}": "/sys/fs/fuse/connections",
-            "{#FSTYPE}": "fusectl"
-        },
-        {
-            "{#FSNAME}": "/proc/fs/nfsd",
-            "{#FSTYPE}": "nfsd"
-        },
-        {
-            "{#FSNAME}": "/data",
-            "{#FSTYPE}": "ext4"
-        },
-        {
-            "{#FSNAME}": "/data1",
-            "{#FSTYPE}": "ext4"
-        },
-        {
-            "{#FSNAME}": "/run/user/42",
-            "{#FSTYPE}": "tmpfs"
-        }
-    ]
-}
-'''
+    :param root_dir: 根目录路径
+    """
+    # 获取根目录的绝对路径，用于后续路径解析
+    # root_abs_path = os.path.abspath(root_dir)
 
-data_dict = json.loads(json_data)
+    for dirpath, dirnames, filenames in os.walk(root_dir):
+        # 获取当前路径的各级目录名
+        parts = dirpath.split(os.sep)
 
-filtered_items = [item for item in data_dict['data'] if item['{#FSTYPE}'] in ['ext4', 'xfs']]
+        # 找到年份目录的位置
+        year_index = None
+        for i, part in enumerate(parts):
+            if part.isdigit() and len(part) == 4:  # 检查是否为年份目录
+                year_index = i
+                break
 
-for item in filtered_items:
-    print(item.get('{#FSNAME}'))
+        # 如果没有找到年份目录，跳过该路径
+        if year_index is None or year_index < len(parts) - 2:
+            continue
 
+        # 提取年份、一级、二级、三级目录名
+        level1 = parts[year_index]  # 年份目录
+        level2 = parts[year_index + 1] if year_index + 1 < len(parts) else ""
+        level3 = parts[year_index + 2] if year_index + 2 < len(parts) else ""
+
+        # 遍历当前目录下的所有文件
+        for filename in filenames:
+            # 构造新文件名
+            new_filename_parts = [level1, level2]
+            if level3 != "":  # 如果存在三级目录
+                new_filename_parts.append(level3)
+            new_filename_parts.append(filename)
+            new_filename = "-".join(new_filename_parts).strip('-')
+
+            # 确保文件名不超长
+            max_length = 255  # 根据操作系统调整
+            base, ext = os.path.splitext(new_filename)
+            if len(new_filename) > max_length:
+                truncated_base = base[: max_length - len(ext)]
+                new_filename = truncated_base + ext
+
+            new_filepath = os.path.join(root_dir, new_filename)
+
+            # 复制文件到根目录并重命名
+            old_filepath = os.path.join(dirpath, filename)
+            try:
+                shutil.copy2(old_filepath, new_filepath)  # 使用 copy2 保留元数据
+                print(f"Copied: {old_filepath} -> {new_filepath}")
+            except Exception as e:
+                print(f"Error copying {old_filepath}: {e}")
+
+
+if __name__ == "__main__":
+    # 设置根目录路径
+    root_directory = "/mnt/c/Users/lvbibir/Desktop/2025-02-27 AI相关工作/管理办法、制度"
+
+    # 确保根目录存在
+    if not os.path.exists(root_directory):
+        print(f"Error: Directory {root_directory} does not exist.")
+    else:
+        copy_and_rename_files(root_directory)
