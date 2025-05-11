@@ -9,8 +9,9 @@ dependencies = [
     "pymysql>=1.1.1",
     "requests>=2.32.3",
     "sqlalchemy>=2.0.40",
+    "tqdm>=4.67.1",
 ]
 
 [[tool.uv.index]]
-url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+url = "https://mirrors.aliyun.com/pypi/simple"
 default = true
